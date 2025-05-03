@@ -183,6 +183,119 @@ def publish_rsync(env, output_path, target_url, credentials, **extra):
         with Command(argline, env=env_vars) as cmd:
             yield from cmd
 
+
+def _prefix_output(lines: Iterable[str], prefix: str = "> ") -> Iterator[str]:
+        """Add prefix to lines."""
+   return (f"{prefix}{line}" for line in lines)
+
+def publish_ghpages(
+    env,
+    output_path: str,
+    target_url: str,
+    credentials: Mapping[str, str] | None = None,
+    cname: str | None = None,
+    preserve_history: bool = True,
+)   Iterator[str]:
+    """Publish the contents of the output path to GitHub pages.
+
+    :param env: The Lektor environment.
+    :param output_path: The path to the generated website.
+    :param target_url: The URL to push to (e.g., git@github.com:owner/repo.git#gh-pages).
+    :param credentials: Optional credentials for the Git repository.
+    :param cname: Optional. Create a top-level ``CNAME`` with given contents.
+    :param preserve_history: Whether to preserve the existing git history.
+    """
+    if not locate_executable("git"):
+        raise PublishError("git executable not found; cannot deploy.")
+
+    url = urlsplit(target_url)
+    fragment = url.fragment
+    push_url_base = url._replace(fragment="").geturl()
+    branch = fragment if fragment else "gh-pages"
+
+    gh_owner = url.hostname.lower() if url.hostname else None
+    gh_project = url.path.strip("/").lower() if url.path else None
+
+    if not push_url_base:
+        raise PublishError("Push URL is missing from the target.")
+    if not gh_owner or not gh_project:
+        warn("GitHub owner or project not clearly defined in target URL.", DeprecationWarning)
+
+    params = _parse_query(url.query, keep_blank_values=True)
+    cname_param = params.get("cname")
+    branch_param = params.get("branch")
+    preserve_history_param = bool_from_string(params.get("preserve_history"), True)
+
+    if branch_param:
+        branch = branch_param
+    if cname_param:
+        cname = cname_param
+    preserve_history = preserve_history_param
+
+    with TemporaryDirectory() as git_dir:
+        environ = {**os.environ, "GIT_WORK_TREE": output_path, "GIT_DIR": git_dir}
+
+        for what, default in [("NAME", "Lektor Bot"), ("EMAIL", "bot@getlektor.com")]:
+            value = (
+                environ.get(f"GIT_AUTHOR_{what}")
+                or environ.get(f"GIT_COMMITTER_{what}")
+                or default
+            )
+            for key in f"GIT_AUTHOR_{what}", f"GIT_COMMITTER_{what}":
+                environ[key] = environ.get(key) or value
+
+        with _ssh_command(credentials, url.port) as ssh_command:
+            if ssh_command:
+                environ.setdefault("GIT_SSH_COMMAND", ssh_command)
+
+            username = credentials.get("username") or url.username
+            password = credentials.get("password") or url.password
+            if push_url_base.startswith("https:") and (username or password):
+                userpass = f"{username}:{password}" if password else username
+                cred_file_path = os.path.join(git_dir, "lektor_cred_file")
+                with open(cred_file_path, "w", encoding="utf-8") as f:
+                    f.write(f"https://{userpass}@{url.netloc}\n")
+                run_command(["git", "config", "credential.helper", f'store --file "{cred_file_path}"'], env=environ)
+
+            def run_command(args: Sequence[str], check: bool = True, input: str | None = None, capture_stdout: bool = False) -> CompletedProcess[str]:
+                cmd = ["git"] + list(args)
+                result = portable_popen(cmd, env=environ, text=True, capture_output=True, input=input)
+                if check and result.returncode != 0:
+                    raise CalledProcessError(result.returncode, cmd, stdout=result.stdout, stderr=result.stderr)
+                return result
+
+            yield from _prefix_output(run_command(["init", "--quiet"]))
+
+            refspec = f"refs/heads/{branch}"
+            if preserve_history:
+                yield "Fetching existing head"
+                fetch_result = run_command(["fetch", "--depth=1", push_url_base, refspec], check=False)
+                yield from _prefix_output(fetch_result.stdout.splitlines())
+                if fetch_result.returncode == 0:
+                    yield from _prefix_output(run_command(["reset", "--soft", "FETCH_HEAD"]).stdout.splitlines())
+                else:
+                    yield f"Creating new branch {branch}"
+
+            yield from _prefix_output(run_command(["add", "--force", "--all", "--", ".", ":(exclude).lektor"]))
+
+            if cname is not None:
+                run_command(["update-index", "--add", "--cacheinfo", "100644", run_command(["hash-object", "-w", "--stdin", input=f"{cname}\n"], capture_stdout=True).stdout.strip(), "CNAME"])
+
+            diff_result = run_command(["diff", "--cached", "--no-renames", "--exit-code", "--quiet"], check=False)
+            if diff_result.returncode == 0:
+                yield "No changes to publish☺"
+            elif diff_result.returncode == 1:
+                yield "Creating commit"
+                yield from _prefix_output(run_command(["commit", "--quiet", "--message", "Synchronized build"]).stdout.splitlines())
+                push_args = ["push", push_url_base, f"HEAD:{refspec}"]
+                if not preserve_history:
+                    push_args.insert(1, "--force")
+                yield "Pushing to github"
+                yield from _prefix_output(run_command(push_args).stdout.splitlines())
+                yield "Success!"
+            else:
+                diff_result.check_returncode()
+
 # FTP and GitHub Pages logic can be filled in similarly by migrating logic from original class methods.
 
 class FtpConnection:
