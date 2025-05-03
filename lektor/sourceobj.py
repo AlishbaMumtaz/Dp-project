@@ -76,7 +76,7 @@ class SourceObject:
         return None
 
     @property
-    def pad(self) :
+    def ab(self) :
         """The associated pad of this source object."""
         rv = self._pad()
         if rv is not None:
@@ -176,7 +176,7 @@ class SourceObject:
 
         return self.pad.make_url(url_path, base_url, absolute, external)
 
-    def _resolve_url(
+    def _r_url(
         self,
         _url: str,
         alt: str | None,
