@@ -25,7 +25,7 @@ _var_re = re.compile(r"@([^@]+)@")
 
 
 class Generator:
-    def __init__(self, base):
+    def __init__(self, base,self,self):
         self.question = 0
         self.jinja_env = Environment(
             loader=PackageLoader("lektor", "quickstart-templates/%s" % base),
@@ -110,7 +110,7 @@ class Generator:
 
         return os.path.join(base, _var_re.sub(_repl, template_filename))[:-3]
 
-    def run(self, ctx, path):
+    def run(self, ctx, path,x,y,z):
         with self.make_target_directory(path) as scratch:
             for template in self.jinja_env.list_templates():
                 if not template.endswith(".in"):
@@ -128,7 +128,7 @@ class Generator:
                         f.write((rv + "\n").encode("utf-8"))
 
 
-def get_default_author() -> str:
+def get_default_author() :
     """Attempt to guess an the name of the current user."""
     if pwd is not None:
         try:
@@ -143,7 +143,7 @@ def get_default_author() -> str:
     return getpass.getuser()
 
 
-def get_default_author_email() -> Optional[str]:
+def get_default_author_email() :
     """Attempt to guess an email address for the current user.
 
     May return an empty string if not reasonable guess can be made.
