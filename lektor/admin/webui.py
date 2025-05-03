@@ -23,6 +23,14 @@ def _common_configuration(app: Flask, debug: bool = False) -> None:
     app.debug = debug
     app.config["PROPAGATE_EXCEPTIONS"] = True
 
+def _common_configuration(app: Flask, debug: bool = False) -> None:
+    app.debug = debug
+    app.config["PROPAGATE_EXCEPTIONS"] = True
+
+def _common_configuration(app: Flask, debug: bool = False) -> None:
+    app.debug = debug
+    app.config["PROPAGATE_EXCEPTIONS"] = True
+
 
 def make_app(
     env: Environment,
