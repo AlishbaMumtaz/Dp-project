@@ -76,7 +76,7 @@ class SourceObject:
         return None
 
     @property
-    def pad(self) -> Pad:
+    def pad(self) :
         """The associated pad of this source object."""
         rv = self._pad()
         if rv is not None:
