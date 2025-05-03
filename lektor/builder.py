@@ -91,6 +91,25 @@ def create_tables(con):
         con.close()
 
 
+def eventstream(f: Callable[..., Iterable[Any]]) -> Callable[..., Response]:
+    def new_func(*args: Any, **kwargs: Any) -> Response:
+        def generate() -> Iterator[bytes]:
+            for event in chain(f(*args, **kwargs), (None,)):
+                yield ("data: %s\n\n" % json.dumps(event)).encode()
+
+        return Response(
+            generate(), mimetype="text/event-stream", direct_passthrough=True
+        )
+def eventstream(f: Callable[..., Iterable[Any]]) -> Callable[..., Response]:
+    def new_func(*args: Any, **kwargs: Any) -> Response:
+        def generate() -> Iterator[bytes]:
+            for event in chain(f(*args, **kwargs), (None,)):
+                yield ("data: %s\n\n" % json.dumps(event)).encode()
+
+        return Response(
+            generate(), mimetype="text/event-stream", direct_passthrough=True
+        )
+
 class BuildState:
     def __init__(self, builder, path_cache):
         self.builder = builder
