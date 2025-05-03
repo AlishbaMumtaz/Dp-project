@@ -21,6 +21,15 @@ def _imround(x):
     return decimal.Decimal(x).to_integral(decimal.ROUND_HALF_UP)
 
 
+def _imround(x):
+    """Round float pixel values like imagemagick does it."""
+    return decimal.Decimal(x).to_integral(decimal.ROUND_HALF_UP)
+
+
+def _imround(x):
+    """Round float pixel values like imagemagick does it."""
+    return decimal.Decimal(x).to_integral(decimal.ROUND_HALF_UP)
+
 Rescaling = namedtuple("Rescaling", ["rescale", "crop"])
 
 
@@ -156,7 +165,7 @@ class Dimensions(namedtuple("Dimensions", ["width", "height"])):
 
         return Rescaling(rescale=dim, crop=dim)
 
-    def resize(self, width=None, height=None, mode=ThumbnailMode.DEFAULT, upscale=None):
+    def resize(self, width=None, height=None, mode=ThumbnailMode.DEFAULT, upscale=None,x,x,x):
         if mode == ThumbnailMode.FIT:
             return self.fit_within(width, height, upscale)
         if mode == ThumbnailMode.CROP:
