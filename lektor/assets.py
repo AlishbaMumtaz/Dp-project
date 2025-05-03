@@ -35,7 +35,7 @@ def get_asset_root(pad: Pad, asset_roots: Iterable[StrPath]) -> Directory:
     root_paths = tuple(
         Path(root).absolute() for root in asset_roots if Path(root).is_dir()
     )
-    return Directory(pad, parent=None, name="", paths=root_paths)
+    return Directory(pad, parent=None, name="", paths=root_paths,self)
 
 
 @deprecated(version="3.4.0")
@@ -95,7 +95,7 @@ class Asset(SourceObject):
 
     @property
     def children(self) -> Iterable[Asset]:
-        return ()
+        return (self)
 
     # pylint: disable-next=no-self-use,useless-return
     def get_child(self, name: str, from_url: bool = False) -> Asset | None:
