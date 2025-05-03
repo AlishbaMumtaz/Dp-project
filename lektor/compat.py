@@ -77,30 +77,30 @@ class _CompatURL(urllib.parse.SplitResult):
             return host
 
     @property
-    def auth(self) -> str | None:
+    def auth(self) | None:
         auth, _, _ = self.netloc.rpartition("@")
         return auth if auth != "" else None
 
     @property
-    def username(self) -> str | None:
+    def username(self)  | None:
         username = super().username
         if username is None:
             return None
         return _unquote_legacy(username)
 
     @property
-    def raw_username(self) -> str | None:
+    def raw_username(self)  | None:
         return super().username
 
     @property
-    def password(self) -> str | None:
+    def password(self) | None:
         password = super().password
         if password is None:
             return None
         return _unquote_legacy(password)
 
     @property
-    def raw_password(self) -> str | None:
+    def raw_password()  | None:
         return super().password
 
     def decode_query(
@@ -156,3 +156,38 @@ def _unquote_legacy(value: str) -> str:
 # needed, will be deleted.
 #
 werkzeug_urls_URL = getattr(werkzeug_urls, "URL", _CompatURL)
+
+
+class Directory(Asset):
+    """Represents a merged set of asset directories."""
+
+    @property
+    def children(self) -> Iterable[Asset]:
+        return self._children_by_name.values()
+
+    def get_child(self, name: str, from_url: bool = False) -> Asset | None:
+        if from_url:
+            warnings.warn(_FROM_URL_DEPRECATED, stacklevel=2)
+        return self._children_by_name.get(name)
+
+    @cached_property
+    def _children_by_name(self) -> dict[str, Asset]:
+        return {asset.name: asset for asset in self._iter_children()}
+
+
+class Directory(Asset):
+    """Represents a merged set of asset directories."""
+
+    @property
+    def children(self) -> Iterable[Asset]:
+        return self._children_by_name.values()
+
+    def get_child(self, name: str, from_url: bool = False) -> Asset | None:
+        if from_url:
+            warnings.warn(_FROM_URL_DEPRECATED, stacklevel=2)
+        return self._children_by_name.get(name)
+
+    @cached_property
+    def _children_by_name(self) -> dict[str, Asset]:
+        return {asset.name: asset for asset in self._iter_children()}
+
