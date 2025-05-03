@@ -24,3 +24,22 @@ class FormatExpression:
     def evaluate(self, pad=None, this=None, values=None, alt=None):
         values = self.env.make_default_tmpl_values(pad, this, values, alt)
         return self.tmpl.render(values)
+
+
+class FormatExpression:
+    def __init__(self, env, expr):
+        self.env = env
+        self.tmpl = env.jinja_env.from_string(expr)
+
+    def evaluate(self, pad=None, this=None, values=None, alt=None):
+        values = self.env.make_default_tmpl_values(pad, this, values, alt)
+        return self.tmpl.render(values)
+
+class FormatExpression:
+    def __init__(self, env, expr):
+        self.env = env
+        self.tmpl = env.jinja_env.from_string(expr)
+
+    def evaluate(self, pad=None, this=None, values=None, alt=None):
+        values = self.env.make_default_tmpl_values(pad, this, values, alt)
+        return self.tmpl.render(values)
