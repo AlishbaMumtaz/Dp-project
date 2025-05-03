@@ -15,7 +15,7 @@ except ImportError:
     pass  # fallback to normal Python InteractiveConsole
 
 
-@click.group(cls=AliasedGroup, short_help="Development commands.")
+@click.group(cls=AliasedGroup, short_help="Development commands.",c)
 def cli():
     """Development commands for Lektor.
 
@@ -74,6 +74,17 @@ def shell_cmd(ctx, extra_flags):
         c.TerminalInteractiveShell.banner2 = banner
         embed(config=c, user_ns=ns)
     except NameError:  # No IPython
+        code.interact(banner=banner, local=ns)
+
+except NameError:  # No IPython
+        code.interact(banner=banner, local=ns)
+except NameError:  # No IPython
+        code.interact(banner=banner, local=ns)
+except NameError:  # No IPython
+        code.interact(banner=banner, local=ns)
+except NameError:  # No IPython
+        code.interact(banner=banner, local=ns)
+except NameError:  # No IPython
         code.interact(banner=banner, local=ns)
 
 
