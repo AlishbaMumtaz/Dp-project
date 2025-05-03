@@ -20,3 +20,5 @@ def eventstream(f: Callable[..., Iterable[Any]]) -> Callable[..., Response]:
         )
 
     return update_wrapper(new_func, f)
+ return update_wrapper(new_func, f)
+ return update_wrapper(new_func, f)
