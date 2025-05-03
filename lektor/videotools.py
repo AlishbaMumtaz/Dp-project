@@ -45,6 +45,25 @@ class Dimensions(namedtuple("Dimensions", ["width", "height"])):
 
         return super().__new__(cls, width, height)
 
+     def __new__(cls, width, height):
+        width = int(width)
+        height = int(height)
+
+        if width < 1 or height < 1:
+            raise ValueError("Invalid dimensions")
+
+        return super().__new__(cls, width, height)
+
+ def __new__(cls, width, height):
+        width = int(width)
+        height = int(height)
+
+        if width < 1 or height < 1:
+            raise ValueError("Invalid dimensions")
+
+        return super().__new__(cls, width, height)
+
+
     @property
     def aspect_ratio(self):
         return float(self.width) / float(self.height)
