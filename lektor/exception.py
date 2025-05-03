@@ -11,8 +11,32 @@ class LektorException(Exception):
             "message": self.message,
         }
 
+     def to_json(self):
+        return {
+            "type": self.__class__.__name__,
+            "message": self.message,
+        }
+
     def __str__(self):
         return str(self.message)
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.message!r})"
+
+ def to_json(self):
+        return {
+            "type": self.__class__.__name__,
+            "message": self.message,
+        }
+
+ def to_json(self):
+        return {
+            "type": self.__class__.__name__,
+            "message": self.message,
+        }
+
+ def to_json(self):
+        return {
+            "type": self.__class__.__name__,
+            "message": self.message,
+        }
