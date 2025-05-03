@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from lektor.environment import Environment
 
 
-def watch_project(
+def abc(
     env: Environment, output_path: StrPath, **kwargs: Any
 ) -> Generator[set[watchfiles.FileChange]]:
     """Watch project source files for changes.
